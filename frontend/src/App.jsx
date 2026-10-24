@@ -46,15 +46,15 @@ const initialAlerts = [
 ];
 
 const colors = {
-  bg: "#080d18",
-  panel: "#101827",
-  border: "#243247",
-  text: "#e8eef8",
-  muted: "#8c9bb1",
-  cyan: "#56e4f5",
-  green: "#51e0a0",
-  red: "#ff667d",
-  amber: "#ffc46b",
+  bg: "#080B10",
+  panel: "#141920",
+  border: "#303943",
+  text: "#E8EDF4",
+  muted: "#98A4B3",
+  cyan: "#8CA3B8",
+  green: "#51E0A0",
+  red: "#FF667D",
+  amber: "#D6B77A",
 };
 
 const css = `
@@ -63,7 +63,7 @@ body { margin: 0; background: ${colors.bg}; color: ${colors.text}; font-family: 
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 button:disabled { opacity: .4; cursor: not-allowed; }
-.ff { min-height: 100vh; background: radial-gradient(ellipse at 70% 0%, #14263a 0%, #080d18 48%); }
+.ff { min-height: 100vh; background: radial-gradient(ellipse at 70% 0%, #111820 0%, #080B10 48%); }
 .ff button:focus-visible, .ff input:focus-visible, .ff select:focus-visible { outline: 2px solid ${colors.cyan}; outline-offset: 2px; }
 .header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:20px 5%; border-bottom:1px solid ${colors.border}; background:#0b1220dd; flex-wrap:wrap; }
 .brand { display:flex; align-items:center; gap:12px; }
