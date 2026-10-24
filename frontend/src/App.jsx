@@ -371,7 +371,7 @@ async function submitSOS(event) {
 async function acknowledgeAlert(id) {
   try {
     const response = await fetch(
-      `http://127.0.0.1:8000/api/alerts/${encodeURIComponent(id)}/acknowledge`,
+      `https://firefly-backend-36rk.onrender.com/api/alerts/${encodeURIComponent(id)}/acknowledge`,
       { method: "POST" }
     );
 
