@@ -10,6 +10,7 @@ from fastapi import FastAPI, HTTPException
 
 app = FastAPI(title="FIREFLY Emergency Mesh API")
 
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -17,11 +18,13 @@ app.add_middleware(
         "http://127.0.0.1:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5174",
+        "https://firefly-frontend-e32m.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 nodes = {
     "ST-01": {"id": "ST-01", "name": "Student Device", "type": "student", "online": True},
     "RLY-01": {"id": "RLY-01", "name": "Relay North", "type": "relay", "online": True},
