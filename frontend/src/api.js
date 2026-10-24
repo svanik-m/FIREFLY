@@ -1,5 +1,5 @@
 
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "https://firefly-backend-36rk.onrender.com";
 
 export async function getNetwork() {
   const response = await fetch(`${API_BASE}/api/network`);
@@ -54,7 +54,7 @@ export async function resetNetwork() {
   }
   return response.json();
 }
-
+  
 export async function getEvents() {
   const response = await fetch(`${API_BASE}/api/events`);
 
