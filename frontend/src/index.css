@@ -66,8 +66,8 @@ select:focus-visible {
   min-height: 100vh;
   color: #E8EDF4;
   background:
-    radial-gradient(ellipse at 75% 0%, #14263a 0%, transparent 42%),
-    #11140F;
+    radial-gradient(ellipse at 75% 0%, #111820 0%, transparent 42%),
+    #080B10;
 }
 
 .ff .header {
