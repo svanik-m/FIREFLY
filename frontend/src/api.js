@@ -54,3 +54,13 @@ export async function resetNetwork() {
   }
   return response.json();
 }
+
+export async function getEvents() {
+  const response = await fetch(`${API_BASE}/api/events`);
+
+  if (!response.ok) {
+    throw new Error(`Events request failed: ${response.status}`);
+  }
+
+  return response.json();
+}

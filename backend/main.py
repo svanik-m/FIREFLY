@@ -6,17 +6,22 @@ from typing import Literal
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
 
 app = FastAPI(title="FIREFLY Emergency Mesh API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 nodes = {
     "ST-01": {"id": "ST-01", "name": "Student Device", "type": "student", "online": True},
     "RLY-01": {"id": "RLY-01", "name": "Relay North", "type": "relay", "online": True},
@@ -26,6 +31,25 @@ nodes = {
 }
 
 alerts = []
+
+events = []
+
+
+def log_event(event_type: str, message: str, alert_id: str = None):
+    event = {
+        "id": f"EV-{uuid4().hex[:8].upper()}",
+        "type": event_type,
+        "message": message,
+        "alert_id": alert_id,
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+    }
+
+    events.insert(0, event)
+
+    # Keep the latest 500 events in memory.
+    del events[500:]
+
+    return event
 
 
 class SOSRequest(BaseModel):
@@ -79,22 +103,12 @@ def create_sos(request: SOSRequest):
         None,
     )
 
+    delivered = (
+        nodes["ST-01"]["online"]
+        and nodes["GW-01"]["online"]
+        and relay is not None
+    )
 
-    # Determine the exact reason if delivery is impossible.
-    if not nodes["ST-01"]["online"]:
-        failure_reason = "STUDENT_DEVICE_OFFLINE"
-        failure_message = "The student device is offline and cannot send the SOS."
-    elif not nodes["GW-01"]["online"]:
-        failure_reason = "GATEWAY_OFFLINE"
-        failure_message = "The command gateway is offline and cannot receive the SOS."
-    elif relay is None:
-        failure_reason = "NO_AVAILABLE_RELAY"
-        failure_message = "All relay nodes are offline. No route is available."
-    else:
-        failure_reason = None
-        failure_message = None
-
-    delivered = failure_reason is None
     route = ["ST-01", relay, "GW-01"] if delivered else []
 
     alert = {
@@ -106,26 +120,53 @@ def create_sos(request: SOSRequest):
         "message": request.message,
         "status": "Delivered" if delivered else "Failed",
         "route": route,
-        "failure_reason": failure_reason,
-        "failure_message": failure_message,
+        "failure_reason": None if delivered else "Network unavailable",
+        "failure_message": None if delivered else "No available route to gateway",
         "time": datetime.now().strftime("%H:%M:%S"),
         "acknowledged": False,
     }
 
     alerts.insert(0, alert)
+
+    log_event(
+        "SOS_CREATED",
+        f"{request.incident} SOS created for {request.block}, {request.floor}",
+        alert["id"],
+    )
+
+    if delivered:
+        log_event(
+            "SOS_DELIVERED",
+            f"SOS routed through {' -> '.join(route)}",
+            alert["id"],
+        )
+    else:
+        log_event(
+            "SOS_FAILED",
+            "SOS could not reach the command gateway",
+            alert["id"],
+        )
+
     return alert
-
-
 
 @app.post("/api/alerts/{alert_id}/acknowledge")
 def acknowledge_alert(alert_id: str):
     alert = next((a for a in alerts if a["id"] == alert_id), None)
+
     if alert is None:
         raise HTTPException(status_code=404, detail="Alert not found")
-    alert["acknowledged"] = True
-    alert["status"] = "Acknowledged"
-    return alert
 
+    if not alert["acknowledged"]:
+        alert["acknowledged"] = True
+        alert["status"] = "Acknowledged"
+
+        log_event(
+            "ALERT_ACKNOWLEDGED",
+            f"Alert {alert_id} was acknowledged",
+            alert_id,
+        )
+
+    return alert
 
 @app.post("/api/network/reset")
 def reset_network():
@@ -136,6 +177,10 @@ def reset_network():
 @app.get("/api/alerts")
 def get_alerts():
     return alerts
+
+@app.get("/api/events")
+def get_events():
+    return events
 
 @app.delete("/api/alerts")
 def clear_alerts():

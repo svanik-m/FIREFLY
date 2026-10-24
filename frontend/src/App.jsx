@@ -2,6 +2,7 @@
 import {
   getNetwork,
   getAlerts,
+  getEvents,
   sendSOS,
   toggleNode as toggleBackendNode,
   resetNetwork as resetBackendNetwork,
@@ -31,7 +32,7 @@ const initialAlerts = [
     floor: "Floor 2",
     time: "12:42:08",
     status: "Delivered",
-    route: "ST-01 â†’ RLY-01 â†’ GW-01",
+    route: "ST-01 -> RLY-01 -> GW-01",
   },
   {
     id: "FF-104276",
@@ -40,7 +41,7 @@ const initialAlerts = [
     floor: "Floor 1",
     time: "12:38:41",
     status: "Acknowledged",
-    route: "ST-01 â†’ RLY-02 â†’ GW-01",
+    route: "ST-01 -> RLY-02 -> GW-01",
   },
 ];
 
@@ -139,6 +140,87 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .footer { text-align:center; padding:20px; border-top:1px solid ${colors.border}; color:${colors.muted}; font-size:10px; letter-spacing:.6px; }
 @media(max-width:850px) { .layout { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:520px) { .main { padding:22px 4% 35px; } .header { padding:17px 4%; } .stats { gap:9px; } .stat { padding:13px; } .stat-value { font-size:24px; } .panel-body { padding:14px; } .node { width:94px; } .network-row { gap:5px; } .form-grid { grid-template-columns:1fr; } .field.full { grid-column:auto; } .heading h2 { font-size:27px; } }
+.event-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.event-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.event-dot {
+  width: 9px;
+  height: 9px;
+  min-width: 9px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 10px #38bdf866;
+}
+
+.event-content {
+  min-width: 0;
+  flex: 1;
+}
+
+.event-content strong {
+  font-size: 13px;
+}
+
+.event-content p {
+  margin: 5px 0;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+
+.event-filter-label {
+  display: block;
+  margin-bottom: 8px;
+  color: ${colors.muted};
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.event-filter {
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 20px;
+  border: 1px solid ${colors.border};
+  border-radius: 9px;
+  background: #0a1220;
+  color: ${colors.text};
+}
+
+.event-dot-sos-created {
+  background: ${colors.amber};
+  box-shadow: 0 0 10px #ffc46b66;
+}
+
+.event-dot-sos-delivered {
+  background: ${colors.green};
+  box-shadow: 0 0 10px #51e0a066;
+}
+
+.event-dot-sos-failed {
+  background: ${colors.red};
+  box-shadow: 0 0 10px #ff667d66;
+}
+
+.event-dot-alert-acknowledged {
+  background: ${colors.cyan};
+  box-shadow: 0 0 10px #56e4f566;
+}
+
 `;
 
 
@@ -154,6 +236,8 @@ function App() {
   const [notice, setNotice] = useState("");
   const [noticeError, setNoticeError] = useState(false);
   const [lastRoute, setLastRoute] = useState("");
+  const [events, setEvents] = useState([]);
+  const [eventFilter, setEventFilter] = useState("ALL");
 
 
 
@@ -166,22 +250,22 @@ function App() {
       isLoading = true;
 
       try {
-        const [networkData, alertData] = await Promise.all([
+        const [networkData, alertData, eventData] = await Promise.all([
           getNetwork(),
           getAlerts(),
-        ]);
+          getEvents(),
+        ])
+      if (!isMounted) return;
 
-        if (!isMounted) return;
-
-        setBackendConnected(true);
-        setLastUpdated(new Date());
-        setNodes(networkData.nodes);
-
+      setBackendConnected(true);
+      setLastUpdated(new Date());
+      setNodes(networkData.nodes);
+      setEvents(eventData);
         setAlerts(
           alertData.map((alert) => ({
             ...alert,
             route: Array.isArray(alert.route)
-              ? alert.route.join(" â†’ ")
+              ? alert.route.join(" -> ")
               : alert.route,
           }))
         );
@@ -258,7 +342,7 @@ async function submitSOS(event) {
     });
 
     const route = Array.isArray(result.route)
-      ? result.route.join(" â†’ ")
+      ? result.route.join(" -> ")
       : result.route || "";
 
     const alert = {
@@ -288,7 +372,7 @@ async function acknowledgeAlert(id) {
   try {
     const response = await fetch(
       `http://127.0.0.1:8000/api/alerts/${encodeURIComponent(id)}/acknowledge`,
-      { method: "PATCH" }
+      { method: "POST" }
     );
 
     if (!response.ok) {
@@ -328,10 +412,11 @@ async function resetNetwork() {
     const resetResult = await resetBackendNetwork();
     console.log("FIREFLY: Reset response:", resetResult);
 
-    const [networkData, alertData] = await Promise.all([
-      getNetwork(),
-      getAlerts(),
-    ]);
+const [networkData, alertData, eventData] = await Promise.all([
+  getNetwork(),
+  getAlerts(),
+  getEvents(),
+]);
 
     console.log("FIREFLY: Network data:", networkData);
     console.log("FIREFLY: Alert data:", alertData);
@@ -341,7 +426,7 @@ async function resetNetwork() {
       alertData.map((alert) => ({
         ...alert,
         route: Array.isArray(alert.route)
-          ? alert.route.join(" â†’ ")
+          ? alert.route.join(" -> ")
           : alert.route,
       }))
     );
@@ -364,12 +449,14 @@ const gateway = nodes.find((node) => node.type === "gateway");
 
   function renderNode(node) {
     const icons = {
-      student: "â—‰",
-      relay: "âŒ",
-      gateway: "âŒ˜",
+      student: "S",
+      relay: "R",
+      gateway: "G",
     };
 
     return (
+
+      
       <div
         className={`node ${node.online ? "online" : "offline"} ${
           node.type === "student"
@@ -388,11 +475,15 @@ const gateway = nodes.find((node) => node.type === "gateway");
             node.online ? "online-text" : "offline-text"
           }`}
         >
-          {node.online ? "â— ONLINE" : "â— OFFLINE"}
+          {node.online ? "ONLINE" : "OFFLINE"}
         </span>
       </div>
     );
   }
+
+  const filteredEvents = events.filter((event) => {
+  return eventFilter === "ALL" || event.type === eventFilter;
+});
 
   return (
     <div className="ff">
@@ -400,7 +491,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
 
       <header className="header">
         <div className="brand">
-          <div className="logo">ÏŸ</div>
+          <div className="logo">FF</div>
           <div>
             <h1>FIREFLY</h1>
             <p>HOSTEL EMERGENCY MESH</p>
@@ -416,7 +507,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
   />
   {backendConnected ? "BACKEND CONNECTED" : "BACKEND DISCONNECTED"}
   {lastUpdated && (
-    <span>{" Â· UPDATED "}{lastUpdated.toLocaleTimeString()}</span>
+    <span>{" | UPDATED "}{lastUpdated.toLocaleTimeString()}</span>
   )}
 </div>
 
@@ -429,7 +520,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
             <h2>Emergency Network</h2>
             <p>Monitor simulated SOS alerts, relay availability and delivery.</p>
           </div>
-          <span className="badge">LOCAL DEMO Â· NO RADIO HARDWARE</span>
+          <span className="badge">LOCAL DEMO | NO RADIO HARDWARE</span>
         </div>
 
         <section className="stats">
@@ -487,7 +578,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                         !student.online || activeRelays === 0 ? "down" : ""
                       }`}
                     >
-                      â†’
+                      {"->"}
                     </span>
                     {renderNode(nodes[1])}
                     <span
@@ -495,7 +586,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                         !nodes[1].online ? "down" : ""
                       }`}
                     >
-                      â†’
+                      {"->"}
                     </span>
                     {renderNode(gateway)}
                   </div>
@@ -504,12 +595,12 @@ const gateway = nodes.find((node) => node.type === "gateway");
                     <span style={{ color: colors.muted, fontSize: 11 }}>
                       Alternate relay paths
                     </span>
-                    <span className="link">â†˜</span>
+                    <span className="link">v</span>
                     {renderNode(nodes[2])}
-                    <span className="link">â†—</span>
-                    <span className="link">â†˜</span>
+                    <span className="link">{"<->"}</span>
+                    <span className="link">v</span>
                     {renderNode(nodes[3])}
-                    <span className="link">â†—</span>
+                    <span className="link">{"<->"}</span>
                   </div>
                 </div>
 
@@ -551,7 +642,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                   <h3>Send Emergency SOS</h3>
                   <p>Simulate a student's emergency request</p>
                 </div>
-                <span style={{ color: colors.cyan, fontSize: 18 }}>ÏŸ</span>
+                <span style={{ color: colors.cyan, fontSize: 18 }}>FF</span>
               </div>
 
               <div className="panel-body">
@@ -604,7 +695,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
 
                     <div className="field full">
                       <button className="primary" type="submit">
-                        âš¡ &nbsp; SEND EMERGENCY SOS
+                        SOS: &nbsp; SEND EMERGENCY SOS
                       </button>
                     </div>
                   </div>
@@ -650,7 +741,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                         <div>
                           <h4>{alert.incident}</h4>
                           <p>
-                            {alert.id} Â· {alert.block}, {alert.floor}
+                            {alert.id} | {alert.block}, {alert.floor}
                           </p>
                           <p>{alert.time}</p>
                         </div>
@@ -678,13 +769,81 @@ const gateway = nodes.find((node) => node.type === "gateway");
                             className="secondary"
                             onClick={() => acknowledgeAlert(alert.id)}
                           >
-                            âœ“ Acknowledge
+                            OK - Acknowledge
                           </button>
                         </div>
                       )}
                     </article>
                   ))
                 )}
+              </div>
+            </div>
+
+           
+            <div className="panel">
+              <div className="panel-head">
+                <div>
+                  <h3>Event Timeline</h3>
+                  <p>Latest FIREFLY network events</p>
+                </div>
+                <span className="badge">
+                  {filteredEvents.length} EVENTS
+                </span>
+              </div>
+
+              <div className="panel-body">
+                <label
+                  className="event-filter-label"
+                  htmlFor="event-filter"
+                >
+                  FILTER EVENTS
+                </label>
+
+                <select
+                  id="event-filter"
+                  className="event-filter"
+                  value={eventFilter}
+                  onChange={(e) => setEventFilter(e.target.value)}
+                >
+                  <option value="ALL">All Events</option>
+                  <option value="SOS_CREATED">SOS Created</option>
+                  <option value="SOS_DELIVERED">SOS Delivered</option>
+                  <option value="SOS_FAILED">SOS Failed</option>
+                  <option value="ALERT_ACKNOWLEDGED">Acknowledged</option>
+                </select>
+
+                <div className="event-timeline">
+                  {filteredEvents.length === 0 ? (
+                    <p className="hint">No events match this filter.</p>
+                  ) : (
+                    filteredEvents.slice(0, 20).map((event) => (
+                      <div className="event-item" key={event.id}>
+                        <span
+                          className={`event-dot event-dot-${event.type
+                            .toLowerCase()
+                            .replaceAll("_", "-")}`}
+                        />
+
+                        <div className="event-content">
+                          <strong>
+                            {event.type.replaceAll("_", " ")}
+                          </strong>
+                          <p>{event.message}</p>
+
+                          <span className="hint">
+                            {new Date(event.timestamp).toLocaleString()}
+                          </span>
+
+                          {event.alert_id && (
+                            <p className="hint">
+                              Alert ID: {event.alert_id}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
             </div>
 
@@ -702,7 +861,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                     <div>
                       <strong>{node.name}</strong>
                       <small>
-                        {node.id} Â· {node.type}
+                        {node.id} | {node.type}
                       </small>
                     </div>
 
@@ -713,7 +872,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                         node.online ? "offline" : "online"
                       }`}
                     >
-                      {node.online ? "â— ONLINE" : "â— OFFLINE"}
+                      {node.online ? "ONLINE" : "OFFLINE"}
                     </button>
                   </div>
                 ))}
@@ -725,7 +884,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                   style={{ width: "100%" }}
                   onClick={resetNetwork}
                 >
-                  â†» Restore All Devices
+                  RESET: Restore All Devices
                 </button>
                 <p className="hint">
                   Try switching Relay North offline and sending an SOS. The
@@ -738,7 +897,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
       </main>
 
       <footer className="footer">
-        FIREFLY Â· EMERGENCY MESH RESEARCH PROTOTYPE Â· SOFTWARE SIMULATION ONLY
+        FIREFLY | EMERGENCY MESH RESEARCH PROTOTYPE | SOFTWARE SIMULATION ONLY
       </footer>
     </div>
   );
