@@ -1,7 +1,7 @@
 ﻿:root {
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
-  color: #F0EEE5;
-  background: #10120D;
+  color: #E8EDF4;
+  background: #080B10;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -25,8 +25,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 50% -15%, #252B1E 0%, transparent 48%),
-    #10120D;
+    radial-gradient(ellipse at 50% -15%, #111923 0%, transparent 48%),
+    #080B10;
 }
 
 button,
@@ -47,7 +47,7 @@ button {
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid #D7D7A5;
+  outline: 2px solid #A8B5C4;
   outline-offset: 3px;
 }
 
@@ -64,7 +64,7 @@ select:focus-visible {
 /* FIREFLY command-center refinements */
 .ff {
   min-height: 100vh;
-  color: #F0EEE5;
+  color: #E8EDF4;
   background:
     radial-gradient(ellipse at 75% 0%, #14263a 0%, transparent 42%),
     #11140F;
@@ -82,8 +82,8 @@ select:focus-visible {
   border-radius: 14px;
   background: linear-gradient(145deg, #122c40, #0b1728);
   box-shadow:
-    0 0 0 4px #A5B8790b,
-    0 0 28px #A5B8791a;
+    0 0 0 4px #8CA3B80b,
+    0 0 28px #8CA3B81a;
 }
 
 .ff .brand h1 {
@@ -92,7 +92,7 @@ select:focus-visible {
 }
 
 .ff .top-status {
-  background: #29351F;
+  background: #15251F;
   box-shadow: inset 0 0 18px #51e0a009;
 }
 
@@ -135,7 +135,7 @@ select:focus-visible {
   position: relative;
   overflow: hidden;
   background: linear-gradient(145deg, #20251A, #151910 75%);
-  border: 1px solid #3C4330;
+  border: 1px solid #283543;
   border-radius: 16px;
   padding: 22px;
   box-shadow: 0 12px 32px #00000014;
@@ -151,7 +151,7 @@ select:focus-visible {
   inset: 0 auto auto 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, #A5B87988, transparent 78%);
+  background: linear-gradient(90deg, #8CA3B888, transparent 78%);
   opacity: 0.65;
 }
 
@@ -177,7 +177,7 @@ select:focus-visible {
 
 .ff .panel {
   background: linear-gradient(155deg, #20251A, #151910 80%);
-  border: 1px solid #3A402F;
+  border: 1px solid #263442;
   border-radius: 17px;
   box-shadow: 0 14px 38px #00000016;
 }
@@ -199,19 +199,19 @@ select:focus-visible {
 }
 
 .ff .network {
-  border: 1px solid #3A402F;
+  border: 1px solid #263442;
   border-radius: 13px;
   background-color: #151910;
   background-image:
-    linear-gradient(#3C433038 1px, transparent 1px),
-    linear-gradient(90deg, #3C433038 1px, transparent 1px),
-    radial-gradient(#69734C 1px, transparent 1px);
+    linear-gradient(#28354338 1px, transparent 1px),
+    linear-gradient(90deg, #28354338 1px, transparent 1px),
+    radial-gradient(#52677A 1px, transparent 1px);
   background-size: 36px 36px, 36px 36px, 18px 18px;
 }
 
 .ff .node {
   border-radius: 14px;
-  background: linear-gradient(145deg, #252B1E, #171B13);
+  background: linear-gradient(145deg, #111923, #171B13);
   box-shadow: 0 8px 20px #00000025;
   transition:
     transform 180ms ease,
@@ -221,13 +221,13 @@ select:focus-visible {
 
 .ff .node.online {
   box-shadow:
-    inset 0 0 22px #A5B87908,
-    0 0 18px #A5B87908;
+    inset 0 0 22px #8CA3B808,
+    0 0 18px #8CA3B808;
 }
 
 .ff .node.online:hover {
   transform: translateY(-2px);
-  box-shadow: 0 0 22px #A5B8791b;
+  box-shadow: 0 0 22px #8CA3B81b;
 }
 
 .ff .node.offline {
@@ -236,7 +236,7 @@ select:focus-visible {
 }
 
 .ff .link {
-  text-shadow: 0 0 12px #A5B87944;
+  text-shadow: 0 0 12px #8CA3B844;
 }
 
 .ff .field label {
@@ -248,7 +248,7 @@ select:focus-visible {
 .ff .field select {
   min-height: 45px;
   background: #13160F;
-  border-color: #454B36;
+  border-color: #354454;
   border-radius: 10px;
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
@@ -260,24 +260,24 @@ select:focus-visible {
 
 .ff .primary {
   min-height: 48px;
-  background: linear-gradient(100deg, #D7D7A5, #87965C);
-  box-shadow: 0 5px 20px #A5B8791b;
+  background: linear-gradient(100deg, #A8B5C4, #65788C);
+  box-shadow: 0 5px 20px #8CA3B81b;
   letter-spacing: 0.025em;
 }
 
 .ff .primary:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 8px 26px #A5B87936;
+  box-shadow: 0 8px 26px #8CA3B836;
 }
 
 .ff .secondary {
-  background: #292E21;
-  border-color: #454B36;
+  background: #1A2530;
+  border-color: #354454;
 }
 
 .ff .secondary:hover:not(:disabled) {
-  background: #343B29;
-  border-color: #69734C;
+  background: #253646;
+  border-color: #52677A;
 }
 
 .ff .danger:hover:not(:disabled) {
