@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   font-family: Inter, "Segoe UI", system-ui, sans-serif;
   color: #E8EDF4;
   background: #080B10;
@@ -134,7 +134,7 @@ select:focus-visible {
 .ff .stat {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(145deg, #20251A, #151910 75%);
+  background: linear-gradient(145deg, #171C22, #10151C 75%);
   border: 1px solid #283543;
   border-radius: 16px;
   padding: 22px;
@@ -176,7 +176,7 @@ select:focus-visible {
 }
 
 .ff .panel {
-  background: linear-gradient(155deg, #20251A, #151910 80%);
+  background: linear-gradient(155deg, #171C22, #10151C 80%);
   border: 1px solid #263442;
   border-radius: 17px;
   box-shadow: 0 14px 38px #00000016;
@@ -201,7 +201,7 @@ select:focus-visible {
 .ff .network {
   border: 1px solid #263442;
   border-radius: 13px;
-  background-color: #151910;
+  background-color: #10151C;
   background-image:
     linear-gradient(#28354338 1px, transparent 1px),
     linear-gradient(90deg, #28354338 1px, transparent 1px),
