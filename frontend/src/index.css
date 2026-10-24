@@ -25,7 +25,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(ellipse at 50% -15%, #111923 0%, transparent 48%),
+    radial-gradient(ellipse at 50% -15%, #0D1117 0%, transparent 48%),
     #080B10;
 }
 
@@ -66,21 +66,21 @@ select:focus-visible {
   min-height: 100vh;
   color: #E8EDF4;
   background:
-    radial-gradient(ellipse at 75% 0%, #111820 0%, transparent 42%),
+    radial-gradient(ellipse at 75% 0%, #0D1117 0%, transparent 42%),
     #080B10;
 }
 
 .ff .header {
   position: relative;
   padding: 20px clamp(20px, 4vw, 64px);
-  background: rgba(7, 13, 25, 0.88);
+  background: rgba(8, 11, 16, 0.94);
   border-bottom: 1px solid #25364b;
   backdrop-filter: blur(18px);
 }
 
 .ff .logo {
   border-radius: 14px;
-  background: linear-gradient(145deg, #122c40, #0b1728);
+  background: linear-gradient(145deg, #171C22, #10151C);
   box-shadow:
     0 0 0 4px #8CA3B80b,
     0 0 28px #8CA3B81a;
@@ -122,7 +122,7 @@ select:focus-visible {
 }
 
 .ff .badge {
-  background: #111d2c;
+  background: #171C22;
   border-color: #2b4058;
 }
 
@@ -205,13 +205,13 @@ select:focus-visible {
   background-image:
     linear-gradient(#28354338 1px, transparent 1px),
     linear-gradient(90deg, #28354338 1px, transparent 1px),
-    radial-gradient(#52677A 1px, transparent 1px);
+    radial-gradient(#46515D 1px, transparent 1px);
   background-size: 36px 36px, 36px 36px, 18px 18px;
 }
 
 .ff .node {
   border-radius: 14px;
-  background: linear-gradient(145deg, #111923, #171B13);
+  background: linear-gradient(145deg, #0D1117, #171B13);
   box-shadow: 0 8px 20px #00000025;
   transition:
     transform 180ms ease,
@@ -271,13 +271,13 @@ select:focus-visible {
 }
 
 .ff .secondary {
-  background: #1A2530;
+  background: #171C22;
   border-color: #354454;
 }
 
 .ff .secondary:hover:not(:disabled) {
-  background: #253646;
-  border-color: #52677A;
+  background: #303943;
+  border-color: #46515D;
 }
 
 .ff .danger:hover:not(:disabled) {
