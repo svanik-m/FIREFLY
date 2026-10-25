@@ -141,6 +141,38 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .footer { text-align:center; padding:20px; border-top:1px solid ${colors.border}; color:${colors.muted}; font-size:10px; letter-spacing:.6px; }
 @media(max-width:850px) { .layout { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media(max-width:520px) { .main { padding:22px 4% 35px; } .header { padding:17px 4%; } .stats { gap:9px; } .stat { padding:13px; } .stat-value { font-size:24px; } .panel-body { padding:14px; } .node { width:94px; } .network-row { gap:5px; } .form-grid { grid-template-columns:1fr; } .field.full { grid-column:auto; } .heading h2 { font-size:27px; } }
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 10px;
+}
+
+.live-clock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border: 1px solid rgba(100, 255, 190, 0.2);
+  border-radius: 10px;
+  background: rgba(100, 255, 190, 0.05);
+}
+
+.live-clock-value {
+  color: #64ffbe;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .header-right {
+    align-items: flex-start;
+    width: 100%;
+  }
+}
 .event-timeline {
   display: flex;
   flex-direction: column;
@@ -1105,6 +1137,24 @@ function App() {
   const [eventFilter, setEventFilter] = useState("ALL");
 
 
+  const [liveTime, setLiveTime] = useState(new Date());
+
+useEffect(() => {
+  const timerId = setInterval(() => {
+    setLiveTime(new Date());
+  }, 1000);
+
+  return () => clearInterval(timerId);
+}, []);
+
+const clockText = liveTime.toLocaleTimeString(undefined, {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: true,
+});
+
+
 
   useEffect(() => {
     let isMounted = true;
@@ -1403,41 +1453,50 @@ function renderNode(node) {
     <div className="ff">
       <style>{css}</style>
 
-      <header className="header">
-        <div className="brand">
-          <div className="logo">FF</div>
-          <div>
-            <h1>FIREFLY</h1>
-            <p>HOSTEL EMERGENCY MESH</p>
-          </div>
-        </div>
+     
+<header className="header">
+  <div className="brand">
+    <div className="logo">FF</div>
+    <div>
+      <h1>FIREFLY</h1>
+      <p>HOSTEL EMERGENCY MESH</p>
+    </div>
+  </div>
 
-<div className="top-status">
-  <span
-    className="dot"
-    style={{
-      background: backendConnected ? colors.green : colors.red,
-    }}
-  />
-  {backendConnected ? "BACKEND CONNECTED" : "BACKEND DISCONNECTED"}
-{lastUpdated && (
-  <span>
-    {" | UPDATED "}
-    {lastUpdated.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: true,
-      timeZone: "Asia/Kolkata",
-    }).replace(/\//g, "-")}
-  </span>
-)}
-</div>
+  <div className="header-right">
+    <div className="live-clock">
+      <span className="live-clock-dot" />
+      <span className="live-clock-label">LOCAL TIME</span>
+      <time className="live-clock-value">{clockText}</time>
+    </div>
 
-      </header>
+    <div className="top-status">
+      <span
+        className="dot"
+        style={{
+          background: backendConnected ? colors.green : colors.red,
+        }}
+      />
+      {backendConnected ? "BACKEND CONNECTED" : "BACKEND DISCONNECTED"}
+
+      {lastUpdated && (
+        <span>
+          {" | UPDATED "}
+          {lastUpdated.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true,
+            timeZone: "Asia/Kolkata",
+          }).replace(/\//g, "-")}
+        </span>
+      )}
+    </div>
+  </div>
+</header>
 
       <main className="main">
         <div className="heading">
