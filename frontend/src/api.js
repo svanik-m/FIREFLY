@@ -1,5 +1,7 @@
 
-const API_BASE = "https://firefly-backend-36rk.onrender.com";
+const API_BASE = import.meta.env.DEV
+  ? "http://127.0.0.1:8000"
+  : "https://firefly-backend-36rk.onrender.com";
 
 export async function getNetwork() {
   const response = await fetch(`${API_BASE}/api/network`);

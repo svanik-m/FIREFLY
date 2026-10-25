@@ -1235,10 +1235,14 @@ async function submitSOS(event) {
 
 async function acknowledgeAlert(id) {
   try {
+    const API_BASE = import.meta.env.DEV
+      ? "http://127.0.0.1:8000"
+      : "https://firefly-backend-36rk.onrender.com";
+
     const response = await fetch(
-      `https://firefly-backend-36rk.onrender.com/api/alerts/${encodeURIComponent(id)}/acknowledge`,
+      `${API_BASE}/api/alerts/${encodeURIComponent(id)}/acknowledge`,
       { method: "POST" }
-    );
+);
 
     if (!response.ok) {
       throw new Error(`Acknowledgement failed: ${response.status}`);
@@ -1312,39 +1316,84 @@ const student = nodes.find((node) => node.type === "student");
 const gateway = nodes.find((node) => node.type === "gateway");
 
 
-  function renderNode(node) {
-    const icons = {
-      student: "S",
-      relay: "R",
-      gateway: "G",
-    };
 
-    return (
+function renderNode(node) {
+  if (!node) return null;
 
-      
-      <div
-        className={`node ${node.online ? "online" : "offline"} ${
-          node.type === "student"
-            ? "node-student"
-            : node.type === "gateway"
-              ? "node-gateway"
-              : ""
+  const icons = {
+    student: "S",
+    relay: "R",
+    gateway: "G",
+  };
+
+  const signal = node.signal_dbm;
+  const latency = node.latency_ms;
+  const battery = node.battery_percent;
+  const delivery = node.packet_delivery_percent;
+  const health = node.health_score;
+  const hasMetrics =
+    signal != null &&
+    latency != null &&
+    battery != null &&
+    delivery != null &&
+    health != null;
+
+  return (
+    <div
+      className={`node ${node.online ? "online" : "offline"} ${
+        node.type === "student"
+          ? "node-student"
+          : node.type === "gateway"
+            ? "node-gateway"
+            : ""
+      }`}
+      key={node.id}
+      title={`${node.name} — ${
+        node.health_status || (node.online ? "Online" : "Offline")
+      }`}
+    >
+      <span className="node-icon">{icons[node.type] || "?"}</span>
+      <span className="node-name">{node.name}</span>
+      <span className="node-id">{node.id}</span>
+
+      <span
+        className={`node-status ${
+          node.online ? "online-text" : "offline-text"
         }`}
-        key={node.id}
       >
-        <span className="node-icon">{icons[node.type]}</span>
-        <span className="node-name">{node.name}</span>
-        <span className="node-id">{node.id}</span>
-        <span
-          className={`node-status ${
-            node.online ? "online-text" : "offline-text"
-          }`}
+        {node.online ? "ONLINE" : "OFFLINE"}
+      </span>
+
+      {hasMetrics && (
+        <div
+          style={{
+            width: "100%",
+            marginTop: 5,
+            paddingTop: 7,
+            borderTop: "1px solid #293641",
+            fontSize: 10,
+            lineHeight: 1.8,
+            color: "#a2b2c2",
+          }}
         >
-          {node.online ? "ONLINE" : "OFFLINE"}
-        </span>
-      </div>
-    );
-  }
+          <div>Health: <strong>{health}/100</strong></div>
+          <div>Signal: {signal} dBm</div>
+          <div>Latency: {latency} ms</div>
+          <div>Battery: {battery}%</div>
+          <div>Delivery: {delivery}%</div>
+          <div
+            style={{
+              color: node.online ? "#51e0a0" : "#ff667d",
+              fontWeight: 700,
+            }}
+          >
+            {node.health_status || (node.online ? "Healthy" : "Offline")}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
   const filteredEvents = events.filter((event) => {
   return eventFilter === "ALL" || event.type === eventFilter;
@@ -1505,11 +1554,13 @@ const gateway = nodes.find((node) => node.type === "gateway");
                   </span>
                 </div>
 
-                <p className="hint">
-                  Demo routing tries Relay North first, then Relay South, then
-                  Relay Backup. This is a simplified software simulation, not a
-                  physical mesh network.
-                </p>
+                  <p className="hint">
+                    FIREFLY evaluates available relays using simulated signal quality,
+                    latency, battery level and packet delivery estimates. If a relay
+                    goes offline, SOS routing selects the highest-scoring available
+                    alternative. Metrics are simulated; no physical radio hardware
+                    is connected.
+                  </p>
               </div>
             </div>
 
@@ -1621,18 +1672,18 @@ const gateway = nodes.find((node) => node.type === "gateway");
                             {alert.id} | {alert.block}, {alert.floor}
                           </p>
                           <p>
-                            {alert.timestamp
-                              ? new Date(alert.timestamp).toLocaleString("en-GB", {
-                                  day: "2-digit",
-                                  month: "2-digit",
-                                  year: "2-digit",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  second: "2-digit",
-                                  hour12: true,
-                                  timeZone: "Asia/Kolkata",
-                                }).replace(/\//g, "-")
-                              : alert.time}
+                          {alert.timestamp
+                            ? new Date(alert.timestamp).toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true,
+                                timeZone: "Asia/Kolkata",
+                              }).replace(/\//g, "-")
+                            : alert.time}
                           </p>
                         </div>
 
@@ -1689,6 +1740,7 @@ const gateway = nodes.find((node) => node.type === "gateway");
                   FILTER EVENTS
                 </label>
 
+                
                 <select
                   id="event-filter"
                   className="event-filter"
@@ -1699,6 +1751,10 @@ const gateway = nodes.find((node) => node.type === "gateway");
                   <option value="SOS_CREATED">SOS Created</option>
                   <option value="SOS_DELIVERED">SOS Delivered</option>
                   <option value="SOS_FAILED">SOS Failed</option>
+                  <option value="NODE_OFFLINE">Node Offline</option>
+                  <option value="NODE_ONLINE">Node Online</option>
+                  <option value="RELAY_FAILOVER">Relay Failover</option>
+                  <option value="NETWORK_RESET">Network Reset</option>
                   <option value="ALERT_ACKNOWLEDGED">Acknowledged</option>
                 </select>
 
