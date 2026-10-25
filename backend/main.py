@@ -47,7 +47,7 @@ def log_event(event_type: str, message: str, alert_id: str = None):
         "type": event_type,
         "message": message,
         "alert_id": alert_id,
-        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat(timespec="seconds"),   
     }
 
     events.insert(0, event)
