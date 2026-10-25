@@ -51,13 +51,14 @@ const colors = {
   border: "#303943",
   text: "#E8EDF4",
   muted: "#98A4B3",
-  cyan: "#8CA3B8",
+  cyan: "#45E6F5",
   green: "#51E0A0",
   red: "#FF667D",
   amber: "#D6B77A",
 };
 
 const css = `
+
 * { box-sizing: border-box; }
 body { margin: 0; background: ${colors.bg}; color: ${colors.text}; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
 button, input, select { font: inherit; }
@@ -219,6 +220,870 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .event-dot-alert-acknowledged {
   background: ${colors.cyan};
   box-shadow: 0 0 10px #56e4f566;
+}
+
+
+/* ===== FIREFLY MIDNIGHT TACTICAL — POLISH LAYER ===== */
+
+/* Cleaner page rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.ff {
+  color-scheme: dark;
+  background:
+    radial-gradient(ellipse at 75% 0%, #151c24 0%, transparent 42%),
+    #080b10;
+}
+
+/* Refined command header */
+.header {
+  background: rgba(8, 11, 16, 0.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+}
+
+.logo {
+  border-radius: 11px;
+  box-shadow: 0 0 18px #8ca3b812;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.brand h1 {
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.brand p {
+  line-height: 1.6;
+}
+
+/* More consistent dashboard spacing */
+.main {
+  padding-top: 32px;
+}
+
+.heading {
+  margin-bottom: 26px;
+}
+
+.heading h2 {
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.stats {
+  gap: 16px;
+}
+
+/* Subtle card depth, without excessive glow */
+.stat,
+.panel {
+  background: linear-gradient(145deg, #161c23, #11161c);
+  border-color: #303943;
+  box-shadow: 0 5px 18px #00000012;
+  transition:
+    border-color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.stat:hover {
+  border-color: #45515e;
+  transform: translateY(-2px);
+  box-shadow: 0 9px 24px #00000022;
+}
+
+.panel {
+  border-radius: 14px;
+}
+
+.panel-head {
+  background: #ffffff03;
+}
+
+.panel-head h3 {
+  font-weight: 700;
+  letter-spacing: 0.15px;
+}
+
+.stat-value {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+}
+
+/* Network: restrained cyan and clearer device cards */
+.network {
+  background-color: #0d1218;
+  background-image: radial-gradient(#53617130 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.node {
+  background: #10161d;
+  border-color: #36414d;
+  border-radius: 11px;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.node.online {
+  border-color: #45e6f566;
+  box-shadow: inset 0 0 18px #45e6f508;
+}
+
+.node.online:hover {
+  border-color: #45e6f5bb;
+  box-shadow: inset 0 0 20px #45e6f50c;
+}
+
+.node-student {
+  border-color: #51e0a088 !important;
+}
+
+.node-gateway {
+  border-color: #d6b77a88 !important;
+}
+
+.node.offline {
+  border-color: #ff667d !important;
+  background: #24151b;
+  box-shadow: inset 0 0 18px #ff667d0b;
+}
+
+.link {
+  color: #45e6f5;
+}
+
+/* Buttons: clear interaction states */
+.primary,
+.secondary,
+.danger,
+.toggle {
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.primary {
+  background: #8ca3b8;
+}
+
+.primary:hover:not(:disabled) {
+  background: #a4b8c9;
+  box-shadow: 0 0 18px #8ca3b81c;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #1b242e;
+  border-color: #526171;
+}
+
+.danger:hover:not(:disabled) {
+  background: #421d28;
+  border-color: #ff667d99;
+}
+
+.toggle:hover:not(:disabled) {
+  border-color: #657381;
+}
+
+/* Consistent inputs */
+.field input,
+.field select,
+.event-filter {
+  background: #0b1016;
+  border-color: #36414d;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.field input:focus,
+.field select:focus,
+.event-filter:focus {
+  border-color: #8ca3b8;
+  box-shadow: 0 0 0 3px #8ca3b814;
+  outline: none;
+}
+
+/* Alert and event readability */
+.alert {
+  transition: background 160ms ease;
+}
+
+.alert:hover {
+  background: #ffffff03;
+}
+
+.event-timeline {
+  scrollbar-width: thin;
+  scrollbar-color: #45515e #10151b;
+}
+
+.event-timeline::-webkit-scrollbar {
+  width: 6px;
+}
+
+.event-timeline::-webkit-scrollbar-thumb {
+  background: #45515e;
+  border-radius: 8px;
+}
+
+.event-dot {
+  background: #45e6f5;
+  box-shadow: 0 0 8px #45e6f533;
+}
+
+.event-dot-sos-created {
+  background: #d6b77a;
+  box-shadow: 0 0 8px #d6b77a33;
+}
+
+.event-dot-sos-delivered {
+  background: #51e0a0;
+  box-shadow: 0 0 8px #51e0a033;
+}
+
+.event-dot-sos-failed {
+  background: #ff667d;
+  box-shadow: 0 0 8px #ff667d33;
+}
+
+.event-dot-alert-acknowledged {
+  background: #45e6f5;
+  box-shadow: 0 0 8px #45e6f533;
+}
+
+/* Keyboard accessibility */
+.ff button:focus-visible,
+.ff input:focus-visible,
+.ff select:focus-visible {
+  outline: 2px solid #45e6f5;
+  outline-offset: 3px;
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .ff *,
+  .ff *::before,
+  .ff *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Smaller screens */
+@media (max-width: 850px) {
+  .main {
+    padding-top: 24px;
+  }
+
+  .stats {
+    gap: 12px;
+  }
+
+  .stat:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .main {
+    padding-top: 20px;
+  }
+
+  .header {
+    gap: 12px;
+  }
+
+  .brand h1 {
+    font-size: 20px;
+    letter-spacing: 3px;
+  }
+
+  .top-status {
+    padding: 8px 10px;
+  }
+
+  .stats {
+    gap: 9px;
+  }
+
+  .panel-head {
+    padding: 15px;
+  }
+
+  .network {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+/* ===== FIREFLY PASS 1: CYAN COMMAND HIERARCHY ===== */
+
+/* Brighter futuristic cyan accent */
+.ff {
+  --ff-cyan: #45e6f5;
+  --ff-cyan-soft: #45e6f51c;
+  --ff-cyan-border: #45e6f555;
+}
+
+/* Dashboard heading */
+.heading h2 {
+  font-size: clamp(28px, 3.2vw, 38px);
+  font-weight: 800;
+  letter-spacing: -1.2px;
+  line-height: 1.12;
+  text-shadow: 0 0 24px #45e6f510;
+}
+
+.eyebrow {
+  color: #45e6f5;
+  letter-spacing: 2.4px;
+}
+
+.heading p {
+  line-height: 1.7;
+}
+
+/* Metric card refinement */
+.stats {
+  gap: 15px;
+}
+
+.stat {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  padding: 20px;
+  background:
+    linear-gradient(135deg, #182129 0%, #11171e 65%, #10151b 100%);
+  border: 1px solid #34424e;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 #ffffff06;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/* Restrained cyan highlight along the top edge */
+.stat::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 0;
+  left: 14%;
+  width: 72%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #45e6f577,
+    transparent
+  );
+}
+
+.stat:hover {
+  border-color: #45e6f566;
+  box-shadow:
+    inset 0 1px 0 #ffffff08,
+    0 0 24px #45e6f50b;
+  transform: translateY(-2px);
+}
+
+.stat-label {
+  color: #aab8c7;
+  font-size: 12px;
+  font-weight: 550;
+  letter-spacing: 0.25px;
+  line-height: 1.5;
+}
+
+.stat-value {
+  margin: 13px 0 8px;
+  font-size: clamp(27px, 2.2vw, 33px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-note {
+  color: #91a1b2;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Make primary cyan accents consistently brighter */
+.ff .eyebrow,
+.ff .link {
+  color: #45e6f5;
+}
+
+/* Keep small labels readable */
+.badge {
+  color: #b0bfce;
+  border-color: #344653;
+  letter-spacing: 0.25px;
+}
+
+/* Preserve the card layout on smaller screens */
+@media (max-width: 850px) {
+  .stat {
+    padding: 17px;
+  }
+
+.stat:hover {
+    transform: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .stat {
+    padding: 13px;
+    border-radius: 11px;
+  }
+
+.stat-value {
+    font-size: 25px;
+    margin: 10px 0 6px;
+  }
+
+.stat-label {
+    font-size: 11px;
+  }
+
+.stat-note {
+    font-size: 10px;
+  }
+}
+
+/* ===== FIREFLY PASS 2: NETWORK TOPOLOGY ===== */
+
+.network {
+  position: relative;
+  isolation: isolate;
+  background-color: #0b1118;
+  background-image:
+    linear-gradient(#45e6f508 1px, transparent 1px),
+    linear-gradient(90deg, #45e6f508 1px, transparent 1px),
+    radial-gradient(#53677955 1px, transparent 1px);
+  background-size: 36px 36px, 36px 36px, 18px 18px;
+  border: 1px solid #263642;
+  border-radius: 12px;
+}
+
+/* Device cards */
+.node {
+  position: relative;
+  background: linear-gradient(145deg, #131e27, #0c131a);
+  border: 1px solid #40515e;
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 #ffffff08;
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.node.online {
+  border-color: #45e6f588;
+  box-shadow:
+    inset 0 0 22px #45e6f508,
+    0 0 12px #45e6f508;
+}
+
+.node.online:hover {
+  border-color: #45e6f5;
+  box-shadow:
+    inset 0 0 24px #45e6f510,
+    0 0 18px #45e6f51a;
+  transform: translateY(-2px);
+}
+
+/* Preserve semantic colors for special devices */
+.node.node-student {
+  border-color: #51e0a0bb !important;
+}
+
+.node.node-gateway {
+  border-color: #d6b77abb !important;
+}
+
+/* Offline state remains unmistakably red */
+.node.offline {
+  border-color: #ff667d !important;
+  background: linear-gradient(145deg, #301821, #191116);
+  box-shadow: inset 0 0 20px #ff667d0c;
+  opacity: 1;
+}
+
+.node-name {
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.node-id {
+  color: #a3b4c4;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.35px;
+}
+
+.node-status {
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 1.2px;
+}
+
+.online-text {
+  color: #51e0a0;
+}
+
+.offline-text {
+  color: #ff667d;
+}
+
+/* Connection arrows and failover path indicators */
+.link {
+  color: #45e6f5;
+  font-size: 20px;
+  font-weight: 800;
+  text-shadow: 0 0 12px #45e6f555;
+}
+
+.link.down {
+  color: #ff667d;
+  text-shadow: 0 0 12px #ff667d44;
+}
+
+.network-legend {
+  gap: 20px;
+  line-height: 1.7;
+}
+
+.legend-square {
+  box-shadow: 0 0 8px currentColor;
+}
+
+@media (max-width: 520px) {
+  .node {
+    width: 94px;
+    padding: 10px 5px;
+  }
+
+.node-name {
+    font-size: 10px;
+  }
+
+.network {
+    background-size: 30px 30px, 30px 30px, 15px 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node,
+  .node.online:hover {
+    transform: none;
+  }
+}
+
+
+/* ===== FIREFLY PASS 3: INCIDENTS & EVENT TIMELINE ===== */
+
+/* Alert panel readability */
+.panel-head h3 {
+  font-weight: 750;
+  letter-spacing: 0.1px;
+}
+
+.panel-head p {
+  color: #a2b2c2;
+  line-height: 1.6;
+}
+
+.alert-list {
+  gap: 0;
+}
+
+.alert {
+  padding: 18px 20px;
+  border-bottom: 1px solid #293641;
+  transition: background 180ms ease;
+}
+
+.alert:hover {
+  background: #45e6f506;
+}
+
+.alert-top {
+  align-items: flex-start;
+}
+
+.alert h4 {
+  color: #edf5fc;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.alert p {
+  color: #a4b4c4;
+  font-size: 11px;
+  line-height: 1.75;
+}
+
+/* Incident status pills */
+.pill {
+  padding: 5px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.35px;
+}
+
+.pill-delivered {
+  background: #153a32;
+  border-color: #51e0a044;
+  color: #51e0a0;
+}
+
+.pill-ack {
+  background: #12313a;
+  border-color: #45e6f555;
+  color: #45e6f5;
+}
+
+.pill-failed {
+  background: #3b2029;
+  border-color: #ff667d66;
+  color: #ff91a1;
+}
+
+/* Timeline layout */
+.event-timeline {
+  gap: 0;
+  max-height: 440px;
+  padding: 4px 2px 4px 0;
+  scrollbar-width: thin;
+  scrollbar-color: #40515f #0d1218;
+}
+
+.event-item {
+  position: relative;
+  gap: 13px;
+  padding: 13px 8px 16px 2px;
+  border-bottom: 1px solid #29364188;
+}
+
+.event-item:last-child {
+  border-bottom: 0;
+}
+
+.event-dot {
+  position: relative;
+  z-index: 1;
+  width: 9px;
+  min-width: 9px;
+  height: 9px;
+  margin-top: 5px;
+  border-radius: 50%;
+  background: #45e6f5;
+  box-shadow: 0 0 11px #45e6f544;
+}
+
+.event-content {
+  min-width: 0;
+}
+
+.event-content strong {
+  display: block;
+  color: #eaf3fb;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.15px;
+  line-height: 1.6;
+}
+
+.event-content p {
+  margin: 5px 0;
+  color: #b0bfce;
+  font-size: 11px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.event-content small {
+  color: #8ea2b4;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+/* Event types retain their semantic colors */
+.event-dot-sos-created {
+  background: #d6b77a;
+  box-shadow: 0 0 10px #d6b77a44;
+}
+
+.event-dot-sos-delivered {
+  background: #51e0a0;
+  box-shadow: 0 0 10px #51e0a044;
+}
+
+.event-dot-sos-failed {
+  background: #ff667d;
+  box-shadow: 0 0 10px #ff667d44;
+}
+
+.event-dot-alert-acknowledged {
+  background: #45e6f5;
+  box-shadow: 0 0 10px #45e6f544;
+}
+
+/* Event filter */
+.event-filter-label {
+  color: #aebdcb;
+  font-size: 10px;
+  letter-spacing: 1.2px;
+}
+
+.event-filter {
+  background-color: #0b1118;
+  border-color: #354754;
+  border-radius: 9px;
+  color: #e8edf4;
+}
+
+.event-filter:hover {
+  border-color: #45e6f588;
+}
+
+.event-filter:focus-visible {
+  outline: 2px solid #45e6f5;
+  outline-offset: 2px;
+}
+
+/* Alert action buttons */
+.alert-actions {
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.alert-actions button {
+  min-height: 32px;
+}
+
+@media (max-width: 520px) {
+  .alert {
+    padding: 15px;
+  }
+
+.alert-top {
+    gap: 8px;
+  }
+
+.event-item {
+    gap: 10px;
+    padding: 12px 4px 14px 0;
+  }
+
+.event-content p {
+    font-size: 11px;
+  }
+
+.pill {
+    padding: 5px 7px;
+    font-size: 8px;
+  }
+}
+
+/* ===== FIREFLY MIDNIGHT TACTICAL: CONTROLS & RESPONSIVE POLISH ===== */
+.primary {
+  background: linear-gradient(135deg, #55edf8, #27c9df);
+  color: #071219;
+  font-weight: 850;
+  letter-spacing: .35px;
+  box-shadow: 0 0 0 1px #45e6f522;
+  transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+.primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #82f4fc, #45e6f5);
+  box-shadow: 0 0 22px #45e6f52b;
+  transform: translateY(-1px);
+}
+.secondary {
+  background: #131e28;
+  border-color: #3b4d5b;
+  color: #dce8f2;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.secondary:hover:not(:disabled) {
+  background: #1b2a36;
+  border-color: #45e6f588;
+}
+.danger { transition: background 160ms ease, border-color 160ms ease; }
+.danger:hover:not(:disabled) {
+  background: #421d28;
+  border-color: #ff667d99;
+}
+.field label, .event-filter-label {
+  font-weight: 750;
+  letter-spacing: 1px;
+}
+.field input, .field select, .event-filter {
+  min-height: 43px;
+  background: #0a1118;
+  border-color: #354754;
+  color: #e8edf4;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+.field input:hover, .field select:hover, .event-filter:hover {
+  border-color: #45e6f577;
+}
+.field input:focus, .field select:focus, .event-filter:focus {
+  border-color: #45e6f5;
+  box-shadow: 0 0 0 3px #45e6f518;
+  outline: none;
+}
+.toggle {
+  min-width: 76px;
+  font-weight: 800;
+  letter-spacing: .3px;
+  transition: background 160ms ease, border-color 160ms ease;
+}
+.toggle.on { color: #51e0a0; background: #123329; border-color: #51e0a077; }
+.toggle.off { color: #ff91a1; background: #351a23; border-color: #ff667d77; }
+.toggle:hover:not(:disabled) { border-color: #45e6f5; }
+.node-control { transition: background 160ms ease; }
+.node-control:hover { background: #45e6f506; }
+.notice {
+  border-color: #45e6f555;
+  background: #10232b;
+  color: #72eff8;
+  overflow-wrap: anywhere;
+}
+.notice.error { border-color: #ff667d77; background: #301821; color: #ff91a1; }
+@media (max-width: 850px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .primary { padding: 13px 10px; font-size: 12px; }
+  .node-control { padding: 13px 14px; }
+  .panel-head { gap: 8px; }
+  .top-status { max-width: 100%; flex-wrap: wrap; overflow-wrap: anywhere; }
 }
 
 `;
@@ -830,10 +1695,18 @@ const gateway = nodes.find((node) => node.type === "gateway");
                           </strong>
                           <p>{event.message}</p>
 
-                          <span className="hint">
-                            {new Date(event.timestamp).toLocaleString()}
-                          </span>
-
+                       <span className="hint">
+                             {new Date(event.timestamp).toLocaleString("en-GB", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: true,
+                                timeZone: "Asia/Kolkata",
+                            })}
+                          </span> 
                           {event.alert_id && (
                             <p className="hint">
                               Alert ID: {event.alert_id}
