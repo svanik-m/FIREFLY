@@ -129,6 +129,7 @@ def create_sos(request: SOSRequest):
         "failure_reason": None if delivered else "Network unavailable",
         "failure_message": None if delivered else "No available route to gateway",
         "time": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
+        "timestamp": datetime.now(ZoneInfo("Asia/Kolkata")).isoformat(timespec="seconds"),
         "acknowledged": False,
     }
 
