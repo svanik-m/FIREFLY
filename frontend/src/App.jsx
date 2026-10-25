@@ -1371,9 +1371,21 @@ const gateway = nodes.find((node) => node.type === "gateway");
     }}
   />
   {backendConnected ? "BACKEND CONNECTED" : "BACKEND DISCONNECTED"}
-  {lastUpdated && (
-    <span>{" | UPDATED "}{lastUpdated.toLocaleTimeString()}</span>
-  )}
+{lastUpdated && (
+  <span>
+    {" | UPDATED "}
+    {lastUpdated.toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Kolkata",
+    }).replace(/\//g, "-")}
+  </span>
+)}
 </div>
 
       </header>
