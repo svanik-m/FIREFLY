@@ -1,4 +1,5 @@
-
+import math
+import time
 from datetime import datetime
 from uuid import uuid4
 from typing import Literal
@@ -98,9 +99,57 @@ simulated_metrics = {
     },
 }
 
+
 alerts = []
 events = []
 
+# Baseline values used when resetting the demo simulation.
+BASELINE_METRICS = {
+    node_id: metrics.copy()
+    for node_id, metrics in simulated_metrics.items()
+}
+
+SIMULATION_STARTED_AT = time.monotonic()
+
+
+def update_simulated_metrics():
+    """Update demo metrics smoothly over elapsed simulation time."""
+    elapsed = time.monotonic() - SIMULATION_STARTED_AT
+
+    for index, (node_id, baseline) in enumerate(
+        BASELINE_METRICS.items()
+    ):
+        metrics = simulated_metrics[node_id]
+
+        # Smooth, bounded changes to signal and latency.
+        wave = math.sin(elapsed / 12 + index * 1.3)
+        latency_wave = math.cos(elapsed / 10 + index)
+
+        metrics["signal_dbm"] = round(
+            max(-95, min(-40, baseline["signal_dbm"] + wave * 7))
+        )
+
+        metrics["latency_ms"] = round(
+            max(5, min(180, baseline["latency_ms"] + latency_wave * 15))
+        )
+
+        metrics["packet_delivery_percent"] = round(
+            max(
+                70,
+                min(
+                    100,
+                    baseline["packet_delivery_percent"] + wave * 1.5,
+                ),
+            ),
+            1,
+        )
+
+        # Slowly drain battery during the demo.
+        drain = min(15, elapsed / 300)
+        metrics["battery_percent"] = round(
+            max(10, baseline["battery_percent"] - drain),
+            1,
+        )
 
 def now_ist():
     return datetime.now(IST)
@@ -111,7 +160,6 @@ def clamp(value, minimum=0, maximum=100):
 
 
 def calculate_node_health(node_id):
-    """Calculate a demo health score from the simulated node metrics."""
     node = nodes[node_id]
 
     if not node["online"]:
@@ -137,7 +185,6 @@ def calculate_node_health(node_id):
 
 
 def serialize_node(node_id):
-    """Return a node with its simulated intelligence fields."""
     node = dict(nodes[node_id])
     metrics = dict(simulated_metrics[node_id])
     health_score = calculate_node_health(node_id)
@@ -175,7 +222,6 @@ def log_event(event_type: str, message: str, alert_id: str = None):
 
 
 def relay_quality_score(relay_id):
-    """Higher score means a better simulated relay candidate."""
     metrics = simulated_metrics[relay_id]
 
     signal_score = clamp(
@@ -191,7 +237,6 @@ def relay_quality_score(relay_id):
         + latency_score * 0.20
         + metrics["battery_percent"] * 0.15
     )
-
 
 def select_best_relay():
     """Choose the highest-scoring online relay."""
@@ -227,11 +272,15 @@ def health():
 
 @app.get("/api/network")
 def network():
+    update_simulated_metrics()
+
     serialized_nodes = [
         serialize_node(node_id) for node_id in nodes
     ]
 
-    online_count = sum(node["online"] for node in serialized_nodes)
+    online_count = sum(
+        node["online"] for node in serialized_nodes
+    )
     online_metrics = [
         node for node in serialized_nodes if node["online"]
     ]
@@ -240,18 +289,20 @@ def network():
         round(
             sum(node["latency_ms"] for node in online_metrics)
             / len(online_metrics),
-            1,
+            2,
         )
-        if online_metrics else None
+        if online_metrics
+        else 0
     )
 
     avg_signal = (
         round(
             sum(node["signal_dbm"] for node in online_metrics)
             / len(online_metrics),
-            1,
+            2,
         )
-        if online_metrics else None
+        if online_metrics
+        else 0
     )
 
     avg_delivery = (
@@ -260,17 +311,20 @@ def network():
                 node["packet_delivery_percent"]
                 for node in online_metrics
             ) / len(online_metrics),
-            1,
+            2,
         )
-        if online_metrics else None
+        if online_metrics
+        else 0
     )
 
     avg_health = (
         round(
             sum(node["health_score"] for node in online_metrics)
-            / len(online_metrics)
+            / len(online_metrics),
+            2,
         )
-        if online_metrics else 0
+        if online_metrics
+        else 0
     )
 
     return {
@@ -283,8 +337,6 @@ def network():
         "average_packet_delivery_percent": avg_delivery,
         "average_health_score": avg_health,
     }
-
-
 @app.get("/api/nodes")
 def get_nodes():
     return [
@@ -417,22 +469,243 @@ def acknowledge_alert(alert_id: str):
 
     return alert
 
+class SOSRequest(BaseModel):
+    name: str
+    incident: Literal["Medical", "Fire", "Security", "Other"]
+    block: str
+    floor: str
+    message: str = ""
+
+
+@app.get("/")
+def root():
+    return {"message": "FIREFLY API is running"}
+
+
+@app.get("/api/health")
+def health():
+    return {"status": "healthy", "service": "FIREFLY"}
+
+
+@app.get("/api/network")
+def network():
+    update_simulated_metrics()
+    serialized_nodes = [
+        serialize_node(node_id) for node_id in nodes
+    ]
+
+    online_count = sum(node["online"] for node in serialized_nodes)
+    online_metrics = [
+        node for node in serialized_nodes if node["online"]
+    ]
+
+    avg_latency = (
+        round(
+            sum(node["latency_ms"] for node in online_metrics)
+            / len(online_metrics),
+            1,
+        )
+        if online_metrics else None
+    )
+
+    avg_signal = (
+        round(
+            sum(node["signal_dbm"] for node in online_metrics)
+            / len(online_metrics),
+            1,
+        )
+        if online_metrics else None
+    )
+
+    avg_delivery = (
+        round(
+            sum(
+                node["packet_delivery_percent"]
+                for node in online_metrics
+            ) / len(online_metrics),
+            1,
+        )
+        if online_metrics else None
+    )
+
+    avg_health = (
+        round(
+            sum(node["health_score"] for node in online_metrics)
+            / len(online_metrics)
+        )
+        if online_metrics else 0
+    )
+
+    return {
+        "nodes": serialized_nodes,
+        "online": online_count,
+        "total": len(nodes),
+        "metrics_source": METRICS_SOURCE,
+        "average_latency_ms": avg_latency,
+        "average_signal_dbm": avg_signal,
+        "average_packet_delivery_percent": avg_delivery,
+        "average_health_score": avg_health,
+    }
+
+
+@app.get("/api/nodes")
+def get_nodes():
+    update_simulated_metrics()
+    return [
+        serialize_node(node_id) for node_id in nodes
+    ]
+
+
+@app.patch("/api/nodes/{node_id}/toggle")
+def toggle_node(node_id: str):
+    if node_id not in nodes:
+        raise HTTPException(status_code=404, detail="Node not found")
+
+    nodes[node_id]["online"] = not nodes[node_id]["online"]
+
+    if nodes[node_id]["online"]:
+        log_event(
+            "NODE_ONLINE",
+            f"{node_id} ({nodes[node_id]['name']}) is back online",
+        )
+    else:
+        log_event(
+            "NODE_OFFLINE",
+            f"{node_id} ({nodes[node_id]['name']}) went offline",
+        )
+
+    return serialize_node(node_id)
+
+
+@app.post("/api/sos")
+def create_sos(request: SOSRequest):
+    timestamp = now_ist()
+    update_simulated_metrics()
+
+    relay = select_best_relay() if (
+        nodes["ST-01"]["online"] and nodes["GW-01"]["online"]
+    ) else None
+
+    delivered = relay is not None
+
+    route = ["ST-01", relay, "GW-01"] if delivered else []
+
+    alert = {
+        "id": f"FF-{uuid4().hex[:6].upper()}",
+        "name": request.name,
+        "incident": request.incident,
+        "block": request.block,
+        "floor": request.floor,
+        "message": request.message,
+        "status": "Delivered" if delivered else "Failed",
+        "route": route,
+        "failure_reason": None if delivered else "Network unavailable",
+        "failure_message": (
+            None if delivered
+            else "Student device, gateway, or all relay nodes are unavailable"
+        ),
+        "time": timestamp.strftime("%H:%M:%S"),
+        "timestamp": timestamp.isoformat(timespec="seconds"),
+        "acknowledged": False,
+        "metrics_source": METRICS_SOURCE,
+        "selected_relay": relay,
+        "route_quality_score": (
+            round(relay_quality_score(relay))
+            if relay else None
+        ),
+        "estimated_route_latency_ms": (
+            sum(simulated_metrics[node_id]["latency_ms"] for node_id in route)
+            if delivered else None
+        ),
+        "estimated_packet_delivery_percent": (
+            round(
+                min(
+                    simulated_metrics[node_id]["packet_delivery_percent"]
+                    for node_id in route
+                ),
+                1,
+            )
+            if delivered else None
+        ),
+    }
+
+    alerts.insert(0, alert)
+
+    log_event(
+        "SOS_CREATED",
+        f"{request.incident} SOS created for {request.block}, {request.floor}",
+        alert["id"],
+    )
+
+    if delivered:
+        if relay != "RLY-01":
+            log_event(
+                "RELAY_FAILOVER",
+                f"Automatic relay selection chose {relay}; RLY-01 was not selected",
+                alert["id"],
+            )
+
+        log_event(
+            "SOS_DELIVERED",
+            f"SOS routed through {' -> '.join(route)}",
+            alert["id"],
+        )
+    else:
+        log_event(
+            "SOS_FAILED",
+            "SOS could not reach the command gateway",
+            alert["id"],
+        )
+
+    return alert
+
+
+@app.post("/api/alerts/{alert_id}/acknowledge")
+def acknowledge_alert(alert_id: str):
+    alert = next(
+        (item for item in alerts if item["id"] == alert_id),
+        None,
+    )
+
+    if alert is None:
+        raise HTTPException(status_code=404, detail="Alert not found")
+
+    if not alert["acknowledged"]:
+        alert["acknowledged"] = True
+        alert["status"] = "Acknowledged"
+
+        log_event(
+            "ALERT_ACKNOWLEDGED",
+            f"Alert {alert_id} was acknowledged",
+            alert_id,
+        )
+
+    return alert
+
 
 @app.post("/api/network/reset")
 def reset_network():
+    global SIMULATION_STARTED_AT
+
     for node in nodes.values():
         node["online"] = True
 
+    # Restore baseline metrics for every node
+    for node_id, baseline in BASELINE_METRICS.items():
+        simulated_metrics[node_id].update(baseline)
+
+    # Restart the simulation cycle so metrics reset cleanly
+    SIMULATION_STARTED_AT = time.monotonic()
+
     log_event(
         "NETWORK_RESET",
-        "All network nodes were restored to online status",
+        "All network nodes and baseline metrics were restored",
     )
 
     return {
         "message": "Network restored",
         "nodes": [serialize_node(node_id) for node_id in nodes],
     }
-
 
 @app.get("/api/alerts")
 def get_alerts():
