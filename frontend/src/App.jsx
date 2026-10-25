@@ -1620,7 +1620,20 @@ const gateway = nodes.find((node) => node.type === "gateway");
                           <p>
                             {alert.id} | {alert.block}, {alert.floor}
                           </p>
-                          <p>{alert.time}</p>
+                          <p>
+                            {alert.timestamp
+                              ? new Date(alert.timestamp).toLocaleString("en-GB", {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                  hour12: true,
+                                  timeZone: "Asia/Kolkata",
+                                }).replace(/\//g, "-")
+                              : alert.time}
+                          </p>
                         </div>
 
                         <span
