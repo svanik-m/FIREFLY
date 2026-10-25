@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException
+from zoneinfo import ZoneInfo
 
 app = FastAPI(title="FIREFLY Emergency Mesh API")
 
@@ -127,7 +128,7 @@ def create_sos(request: SOSRequest):
         "route": route,
         "failure_reason": None if delivered else "Network unavailable",
         "failure_message": None if delivered else "No available route to gateway",
-        "time": datetime.now().strftime("%H:%M:%S"),
+        "time": datetime.now(ZoneInfo("Asia/Kolkata")).strftime("%H:%M:%S"),
         "acknowledged": False,
     }
 
