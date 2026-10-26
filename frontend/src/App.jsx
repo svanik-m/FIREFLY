@@ -1118,6 +1118,243 @@ body {
   .top-status { max-width: 100%; flex-wrap: wrap; overflow-wrap: anywhere; }
 }
 
+
+/* ===== FIREFLY COMMAND CENTER: FINAL LAYOUT ===== */
+
+
+.ff {
+--cc-bg: #080f19;
+--cc-panel: #111e2b;
+--cc-border: #2a3b4c;
+--cc-muted: #9aafc2;
+--cc-teal: #45e6c2;
+}
+
+.header {
+position: sticky;
+top: 0;
+z-index: 20;
+background: rgba(8, 15, 25, 0.94);
+border-bottom-color: #2a3b4c;
+}
+
+.brand .logo {
+background: #102831;
+border-color: #45e6c2;
+color: #75f2d8;
+}
+
+.main {
+max-width: 1540px;
+}
+
+.heading {
+padding: 8px 0 4px;
+}
+
+.heading h2 {
+color: #f2f7fc;
+}
+
+.stats {
+margin-bottom: 24px;
+}
+
+.stat,
+.panel {
+background: linear-gradient(145deg, #142332, #0e1823);
+border-color: #2a3b4c;
+box-shadow: 0 8px 28px #00000018;
+}
+
+.stat {
+position: relative;
+}
+
+.stat-label {
+text-transform: uppercase;
+letter-spacing: 0.8px;
+font-size: 10px;
+font-weight: 750;
+}
+
+.stat-note {
+line-height: 1.6;
+}
+
+.panel {
+border-radius: 15px;
+}
+
+.panel-head {
+background: #ffffff04;
+padding: 20px 22px;
+}
+
+.panel-head h3 {
+color: #f2f7fc;
+font-size: 14px;
+letter-spacing: 0.2px;
+}
+
+.panel-body {
+padding: 21px;
+}
+
+.network {
+border-radius: 12px;
+border-color: #263c4c;
+background-color: #09131d;
+}
+
+.node {
+min-width: 0;
+}
+
+.analytics-panel {
+overflow: hidden;
+}
+
+.analytics-summary {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 12px;
+}
+
+.analytics-metric {
+min-width: 0;
+padding: 15px;
+border: 1px solid #2a3b4c;
+border-radius: 10px;
+background: #0b1621;
+}
+
+.analytics-metric > span {
+display: block;
+color: #9aafc2;
+font-size: 10px;
+font-weight: 750;
+letter-spacing: 0.7px;
+}
+
+.analytics-metric > strong {
+display: block;
+margin: 10px 0 7px;
+font-size: 27px;
+font-variant-numeric: tabular-nums;
+}
+
+.analytics-metric > small {
+color: #91a5b8;
+font-size: 10px;
+}
+
+.analytics-green {
+color: #51e0a0;
+}
+
+.analytics-cyan {
+color: #45e6f5;
+}
+
+.analytics-red {
+color: #ff667d;
+}
+
+.analytics-track {
+width: 100%;
+height: 7px;
+overflow: hidden;
+border-radius: 20px;
+background: #273746;
+}
+
+.analytics-fill {
+height: 100%;
+min-width: 0;
+border-radius: inherit;
+transition: width 220ms ease;
+}
+
+.availability-fill {
+background: linear-gradient(90deg, #299e8c, #45e6c2);
+}
+
+.analytics-chart-heading {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 12px;
+margin: 25px 0 18px;
+}
+
+.analytics-chart-heading strong {
+color: #e8f0f8;
+font-size: 12px;
+}
+
+.analytics-chart-heading span {
+color: #91a5b8;
+font-size: 10px;
+text-align: right;
+}
+
+.analytics-bars {
+display: flex;
+flex-direction: column;
+gap: 17px;
+}
+
+.analytics-bar-row {
+display: grid;
+grid-template-columns: minmax(90px, 1fr) minmax(70px, 1.5fr) 24px;
+align-items: center;
+gap: 12px;
+}
+
+.analytics-bar-label {
+color: #b5c4d2;
+font-size: 11px;
+}
+
+.analytics-bar-count {
+color: #e8f0f8;
+font-size: 11px;
+text-align: right;
+font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 520px) {
+.panel-head {
+padding: 15px;
+}
+
+.panel-body {
+padding: 14px;
+}
+
+.analytics-summary {
+gap: 8px;
+}
+
+.analytics-metric {
+padding: 12px;
+}
+
+.analytics-metric > strong {
+font-size: 23px;
+}
+
+.analytics-bar-row {
+grid-template-columns: minmax(80px, 1fr) minmax(55px, 1fr) 20px;
+gap: 8px;
+}
+
+.analytics-bar-label {
+font-size: 10px;
+}
+}
+
 `;
 
 
@@ -1126,6 +1363,7 @@ function App() {
   const [backendConnected, setBackendConnected] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [nodes, setNodes] = useState(initialNodes);
+  const [activeRoute, setActiveRoute] = useState([]);
   const [alerts, setAlerts] = useState(initialAlerts);
   const [incident, setIncident] = useState("Medical Emergency");
   const [block, setBlock] = useState("Block A");
@@ -1139,6 +1377,7 @@ function App() {
 
   const [liveTime, setLiveTime] = useState(new Date());
 
+
 useEffect(() => {
   const timerId = setInterval(() => {
     setLiveTime(new Date());
@@ -1146,6 +1385,22 @@ useEffect(() => {
 
   return () => clearInterval(timerId);
 }, []);
+
+
+
+const isRouteLinkActive = (from, to) => {
+  for (let i = 0; i < activeRoute.length - 1; i++) {
+    if (
+      activeRoute[i] === from &&
+      activeRoute[i + 1] === to
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 
 const clockText = liveTime.toLocaleTimeString(undefined, {
   hour: "2-digit",
@@ -1212,6 +1467,60 @@ const clockText = liveTime.toLocaleTimeString(undefined, {
   const deliveredCount = alerts.filter(
     (alert) => alert.status !== "Failed"
   ).length;
+
+
+const failedAlerts = alerts.filter(
+  (alert) => alert.status === "Failed"
+).length;
+
+const acknowledgedAlerts = alerts.filter(
+  (alert) => alert.status === "Acknowledged"
+).length;
+
+const deliveredAlerts = alerts.filter(
+  (alert) => alert.status === "Delivered"
+).length;
+
+const onlineNodes = nodes.filter((node) => node.online).length;
+
+const nodeAvailability = nodes.length
+  ? Math.round((onlineNodes / nodes.length) * 100)
+  : 0;
+
+const eventTypeCounts = [
+  {
+    label: "SOS created",
+    type: "SOS_CREATED",
+    color: "#D6B77A",
+  },
+  {
+    label: "SOS delivered",
+    type: "SOS_DELIVERED",
+    color: "#51E0A0",
+  },
+  {
+    label: "SOS failed",
+    type: "SOS_FAILED",
+    color: "#FF667D",
+  },
+  {
+    label: "Node offline",
+    type: "NODE_OFFLINE",
+    color: "#45E6F5",
+  },
+].map((item) => ({
+  ...item,
+  count:
+    item.type === "NODE_OFFLINE"
+      ? nodes.filter((node) => !node.online).length
+      : events.filter((event) => event.type === item.type).length,
+}));
+
+const maxEventCount = Math.max(
+  1,
+  ...eventTypeCounts.map((item) => item.count)
+);
+
 
 
 async function toggleNode(id) {
@@ -1340,16 +1649,25 @@ const [networkData, alertData, eventData] = await Promise.all([
     console.log("FIREFLY: Network data:", networkData);
     console.log("FIREFLY: Alert data:", alertData);
 
-    setNodes(networkData.nodes);
-    setAlerts(
-      alertData.map((alert) => ({
-        ...alert,
-        route: Array.isArray(alert.route)
-          ? alert.route.join(" -> ")
-          : alert.route,
-      }))
-    );
+setNodes(networkData.nodes);
 
+setActiveRoute(
+  Array.isArray(networkData.active_route)
+    ? networkData.active_route
+    : []
+);
+
+setAlerts(
+  alertData.map((alert) => ({
+    ...alert,
+    route: Array.isArray(alert.route)
+      ? alert.route.join(" -> ")
+      : alert.route,
+  }))
+);
+
+
+    setEvents(eventData);
     setLastRoute("");
     setNotice("Network restored. All simulated devices are online.");
     setNoticeError(false);
@@ -1453,7 +1771,7 @@ function renderNode(node) {
     <div className="ff">
       <style>{css}</style>
 
-     
+
 <header className="header">
   <div className="brand">
     <div className="logo">FF</div>
@@ -1779,7 +2097,90 @@ function renderNode(node) {
               </div>
             </div>
 
-           
+
+<div className="panel analytics-panel">
+  <div className="panel-head">
+    <div>
+      <h3>Operational Analytics</h3>
+      <p>Current alert outcomes and recorded network events</p>
+    </div>
+    <span className="badge">LIVE DATA</span>
+  </div>
+
+  <div className="panel-body">
+    <div className="analytics-summary">
+      <div className="analytics-metric">
+        <span>NODE AVAILABILITY</span>
+        <strong>{nodeAvailability}%</strong>
+        <div className="analytics-track">
+          <div
+            className="analytics-fill availability-fill"
+            style={{ width: `${nodeAvailability}%` }}
+          />
+        </div>
+      </div>
+
+      <div className="analytics-metric">
+        <span>DELIVERED</span>
+        <strong className="analytics-green">{deliveredAlerts}</strong>
+        <small>Delivered SOS alerts</small>
+      </div>
+
+      <div className="analytics-metric">
+        <span>ACKNOWLEDGED</span>
+        <strong className="analytics-cyan">
+          {acknowledgedAlerts}
+        </strong>
+        <small>Confirmed alerts</small>
+      </div>
+
+      <div className="analytics-metric">
+        <span>FAILED</span>
+        <strong className="analytics-red">{failedAlerts}</strong>
+        <small>Unsuccessful deliveries</small>
+      </div>
+    </div>
+
+    <div className="analytics-chart-heading">
+      <strong>Event distribution</strong>
+      <span>{events.length} loaded events</span>
+    </div>
+
+    <div className="analytics-bars">
+      {eventTypeCounts.map((item) => (
+        <div className="analytics-bar-row" key={item.type}>
+          <span className="analytics-bar-label">{item.label}</span>
+
+          <div
+            className="analytics-track"
+            role="progressbar"
+            aria-label={item.label}
+            aria-valuemin={0}
+            aria-valuemax={maxEventCount}
+            aria-valuenow={item.count}
+          >
+            <div
+              className="analytics-fill"
+              style={{
+                width: `${(item.count / maxEventCount) * 100}%`,
+                background: item.color,
+              }}
+            />
+          </div>
+
+          <strong className="analytics-bar-count">{item.count}</strong>
+        </div>
+      ))}
+    </div>
+
+    <p className="hint">
+      Metrics reflect the records currently returned by the backend.
+      Event counts are not a time-based trend or a prediction.
+    </p>
+  </div>
+</div>
+
+
             <div className="panel">
               <div className="panel-head">
                 <div>
@@ -1799,7 +2200,7 @@ function renderNode(node) {
                   FILTER EVENTS
                 </label>
 
-                
+
                 <select
                   id="event-filter"
                   className="event-filter"
@@ -1846,7 +2247,7 @@ function renderNode(node) {
                                 hour12: true,
                                 timeZone: "Asia/Kolkata",
                             })}
-                          </span> 
+                          </span>
                           {event.alert_id && (
                             <p className="hint">
                               Alert ID: {event.alert_id}

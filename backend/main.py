@@ -5,12 +5,54 @@ from uuid import uuid4
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import asyncio
+
 
 
 app = FastAPI(title="FIREFLY Emergency Mesh API")
+
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
+
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+
+    def disconnect(self, websocket: WebSocket):
+        if websocket in self.active_connections:
+            self.active_connections.remove(websocket)
+
+    async def broadcast(self, message: dict):
+        disconnected = []
+
+        for connection in self.active_connections.copy():
+            try:
+                await connection.send_json(message)
+            except Exception:
+                disconnected.append(connection)
+
+        for connection in disconnected:
+            self.disconnect(connection)
+
+
+manager = ConnectionManager()
+
+main_event_loop = None
+
+async def broadcast_event(event: dict):
+    await manager.broadcast({
+        "type": "event",
+        "data": event,
+    })
+
+@app.on_event("startup")
+async def capture_main_event_loop():
+    global main_event_loop
+    main_event_loop = asyncio.get_running_loop()
 
 IST = ZoneInfo("Asia/Kolkata")
 METRICS_SOURCE = "simulated"
@@ -218,8 +260,13 @@ def log_event(event_type: str, message: str, alert_id: str = None):
     events.insert(0, event)
     del events[500:]
 
-    return event
+    if main_event_loop and main_event_loop.is_running():
+        asyncio.run_coroutine_threadsafe(
+            broadcast_event(event),
+            main_event_loop,
+        )
 
+    return event
 
 def relay_quality_score(relay_id):
     metrics = simulated_metrics[relay_id]
@@ -250,6 +297,48 @@ def select_best_relay():
         return None
 
     return max(candidates, key=relay_quality_score)
+
+
+# Simulated mesh topology: each connection is bidirectional.
+MESH_LINKS = {
+    "ST-01": ["RLY-01", "RLY-02"],
+    "RLY-01": ["ST-01", "RLY-03", "GW-01"],
+    "RLY-02": ["ST-01", "RLY-03"],
+    "RLY-03": ["RLY-01", "RLY-02", "GW-01"],
+    "GW-01": ["RLY-01", "RLY-03"],
+}
+
+
+def find_mesh_route(start="ST-01", target="GW-01"):
+    """Find a valid route through online nodes using breadth-first search."""
+    if start not in nodes or target not in nodes:
+        return []
+
+    if not nodes[start]["online"] or not nodes[target]["online"]:
+        return []
+
+    queue = [[start]]
+    visited = {start}
+
+    while queue:
+        path = queue.pop(0)
+        current = path[-1]
+
+        if current == target:
+            return path
+
+        for neighbor in MESH_LINKS.get(current, []):
+            if neighbor in visited:
+                continue
+
+            if not nodes[neighbor]["online"]:
+                continue
+
+            visited.add(neighbor)
+            queue.append(path + [neighbor])
+
+    return []
+
 
 
 class SOSRequest(BaseModel):
@@ -365,17 +454,16 @@ def toggle_node(node_id: str):
     return serialize_node(node_id)
 
 
+
 @app.post("/api/sos")
 def create_sos(request: SOSRequest):
     timestamp = now_ist()
 
-    relay = select_best_relay() if (
-        nodes["ST-01"]["online"] and nodes["GW-01"]["online"]
-    ) else None
+    route = find_mesh_route("ST-01", "GW-01")
+    delivered = bool(route)
 
-    delivered = relay is not None
-
-    route = ["ST-01", relay, "GW-01"] if delivered else []
+    # Keep the existing alert fields compatible with the frontend.
+    relay = route[1] if delivered and len(route) > 2 else None
 
     alert = {
         "id": f"FF-{uuid4().hex[:6].upper()}",
@@ -391,6 +479,7 @@ def create_sos(request: SOSRequest):
             None if delivered
             else "Student device, gateway, or all relay nodes are unavailable"
         ),
+
         "time": timestamp.strftime("%H:%M:%S"),
         "timestamp": timestamp.isoformat(timespec="seconds"),
         "acknowledged": False,
@@ -536,6 +625,7 @@ def network():
         if online_metrics else 0
     )
 
+
     return {
         "nodes": serialized_nodes,
         "online": online_count,
@@ -545,7 +635,10 @@ def network():
         "average_signal_dbm": avg_signal,
         "average_packet_delivery_percent": avg_delivery,
         "average_health_score": avg_health,
+        "active_route": find_mesh_route("ST-01", "GW-01"),
+        "route_available": bool(find_mesh_route("ST-01", "GW-01")),
     }
+
 
 
 @app.get("/api/nodes")
@@ -722,3 +815,22 @@ def clear_alerts():
     alerts.clear()
     log_event("ALERTS_CLEARED", "Alert history was cleared")
     return {"message": "Alerts cleared"}
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+
+    try:
+        await websocket.send_json({
+            "type": "connected",
+            "message": "Connected to FIREFLY live events",
+        })
+
+        while True:
+            await websocket.receive_text()
+
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+
+    except Exception:
+        manager.disconnect(websocket)
