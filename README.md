@@ -1,127 +1,73 @@
-# FIREFLY — Emergency Network Simulation
+## 🚨 Live SOS Sender & Receiver
 
-FIREFLY is a software simulation of an emergency communication network designed to demonstrate how SOS messages can travel through relay nodes to a gateway.
+FIREFLY now includes a dedicated **SOS Sender** interface and a **Live Receiver** interface alongside the main Command Center dashboard. These interfaces communicate with the FastAPI backend to demonstrate live emergency-alert delivery and acknowledgement.
 
-The project simulates emergency message delivery, relay failover, network failures, and recovery through an interactive dashboard.
+### System Components
 
-## Key Features
+| Component | Port | Purpose |
+|---|---:|---|
+| FastAPI Backend | `8000` | Processes SOS alerts and broadcasts events |
+| Main Dashboard | `5173` | Command Center and network monitoring |
+| SOS Sender | `5174` | Sends emergency SOS alerts |
+| Live Receiver | `5175` | Receives and displays alerts in real time |
 
-- Emergency SOS message generation and delivery tracking
-- Automatic relay failover when a relay becomes unavailable
-- Simulation of offline student devices, relays, and gateways
-- Interactive network dashboard and device controls
-- Event Timeline with event filters
-- Alert acknowledgement
-- Network reset and recovery
+### Prerequisites
 
-## Technology Stack
+- Python and the project's backend virtual environment
+- Node.js and npm
+- Dependencies installed in the backend, `frontend`, `sos-sender`, and `live-receiver` directories
 
-- **Frontend:** React and Vite
-- **Backend:** Python and FastAPI
-- **API Server:** Uvicorn
-- **Version Control:** Git and GitHub
+### How to Run
 
-## Project Structure
+Start each component in a separate PowerShell terminal.
 
-```text
-FIREFLY/
-├── backend/
-│   ├── main.py
-│   └── .venv/
-├── frontend/
-│   ├── src/
-│   ├── package.json
-│   └── ...
-├── .gitignore
-└── README.md
-```
-
-### Main Components
-
-- **backend/main.py:** Handles the API and emergency network simulation.
-- **frontend/src/:** Contains the React frontend components and interface.
-- **README.md:** Explains the project and how to run it.
-- **.gitignore:** Specifies files Git should ignore.
-
-## How to Run FIREFLY
-
-### 1. Start the Backend
-
-Open a terminal in VS Code and run:
+**1. Backend API**
 
 ```powershell
-cd C:\Users\ssuva\FIREFLY\backend
-python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+cd C:\Users\ssuva\FIREFLY
+& .\backend\.venv\Scripts\Activate.ps1
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-The backend API will run at:
-
-http://127.0.0.1:8000
-
-API documentation:
-
-http://127.0.0.1:8000/docs
-
-### 2. Start the Frontend
-
-Open a **second terminal** in VS Code. Keep the backend terminal running.
-
-Run:
+**2. Main Command Center**
 
 ```powershell
 cd C:\Users\ssuva\FIREFLY\frontend
-npm.cmd run dev
+npm run dev
 ```
 
-Open the local URL displayed by Vite in your browser. It is usually:
+**3. SOS Sender**
 
-http://localhost:5173
+```powershell
+cd C:\Users\ssuva\FIREFLY\sos-sender
+npm run dev -- --host 127.0.0.1 --port 5174
+```
 
-### 3. Important
+**4. Live Receiver**
 
-- Keep both terminals running while using the application.
-- Start the backend before testing SOS delivery.
-- Press `Ctrl + C` in a terminal to stop its server when finished.
+```powershell
+cd C:\Users\ssuva\FIREFLY\live-receiver
+npm run dev -- --host 127.0.0.1 --port 5175
+```
 
-## Simulation Test Scenarios
+### Access the Interfaces
 
-Use the FIREFLY dashboard to test the following scenarios.
+- **Command Center:** http://127.0.0.1:5173
+- **SOS Sender:** http://127.0.0.1:5174
+- **Live Receiver:** http://127.0.0.1:5175
+- **API Health Check:** http://127.0.0.1:8000/api/health
+- **API Documentation:** http://127.0.0.1:8000/docs
 
-### Test 1: Normal SOS Delivery
-1. Ensure the student device, relay nodes, and gateway are online.
-2. Trigger an SOS.
-3. Verify that the SOS is delivered through an available relay.
+### SOS Workflow
 
-### Test 2: Relay Failover
-1. Disable the primary relay.
-2. Trigger an SOS.
-3. Verify that another online relay is selected.
+1. Start the backend and all three frontend applications.
+2. Open the SOS Sender and trigger an emergency alert.
+3. The backend processes the alert and broadcasts the relevant event.
+4. The Live Receiver displays the incoming alert without requiring a manual refresh when the live connection is working.
+5. Acknowledge the alert and verify the updated status in the system.
 
-### Test 3: Student Device Offline
-1. Disable the student device.
-2. Trigger an SOS.
-3. Verify that delivery fails.
+### Important Notes
 
-### Test 4: All Relays Offline
-1. Disable all relay nodes.
-2. Trigger an SOS.
-3. Verify that no delivery route is available.
-
-### Test 5: Gateway Offline
-1. Disable the gateway.
-2. Trigger an SOS.
-3. Verify that delivery fails.
-
-### Test 6: Network Recovery
-1. Use the network reset control.
-2. Verify that the devices return online.
-3. Trigger a new SOS and confirm delivery.
-
-### Test 7: Event Timeline
-1. Generate successful and failed SOS events.
-2. Use the timeline filters.
-3. Verify that the displayed events match the selected filter.
-
-## Limitations
-
-FIREFLY is a software simulation for demonstration and testing. It is not a production emergency-response system. Simulation events and state may be stored in memory and can reset when the backend restarts.
+- Keep the backend running while testing the frontends.
+- If an interface cannot connect, verify that the backend is available and that the frontend API configuration points to the correct backend address.
+- This project currently demonstrates an emergency-response workflow. Simulated network routes and local testing do not establish real-world emergency-service reliability.
